@@ -8,23 +8,40 @@ import {LockTime} from "../src/LockTime.sol";
 
 contract LockTimeTest is Test{
     LockTime l1;
+    uint256 BeforeTime;
+    uint256 AfterTime;
 
     function setUp() public {
-        l1=new LockTime(12356789236545678938765);
+        l1=new LockTime(100);
+        BeforeTime=50;
+        AfterTime=200;
     }
 
-
-
-    function testCheckForDifferentTimestamps() public {
-
-        vm.warp(12356789236545678938765);
-        l1.unlockTheGift();
+    function testAdminBeforeTime()public{        
+        vm.warp(BeforeTime);
         vm.expectRevert();
+        l1.unlockTheGift();
+    }
+// only in this scemario the admin should be able to unlock the gift
+    function testAdminAfterTime() public {
+        vm.warp(AfterTime);
+        l1.unlockTheGift();
+        assertEq(l1.unlock(),true, "ok");
     }
 
 
+    function testNonAdminBeforeTime() public{
+            vm.warp(BeforeTime);
+            vm.prank(0x388c0e176cC68b3f4020C38116ae9044DC2cafF8);
+            vm.expectRevert();
+            l1.unlockTheGift();
+    }
 
-
-
+    function testNonAdminAfterTime() public{    
+           vm.warp(AfterTime);
+           vm.prank(0x388c0e176cC68b3f4020C38116ae9044DC2cafF8);
+           vm.expectRevert();
+           l1.unlockTheGift();
+    }
 
 }
